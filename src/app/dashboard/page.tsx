@@ -1,18 +1,15 @@
+import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/core/server";
 
 export default async function DashboardIndexPage() {
   const session = await requireAuth("/dashboard");
+  const role = session.user.role || "customer";
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Welcome, {session.user.name}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Use the sidebar menu to manage your {session.user.role || "customer"} dashboard.
-        </p>
-      </div>
-    </div>
-  );
+  if (role === "admin") {
+    redirect("/dashboard/admin");
+  }
+  if (role === "owner") {
+    redirect("/dashboard/owner");
+  }
+  redirect("/dashboard/customer/rentals");
 }

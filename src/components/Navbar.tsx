@@ -29,6 +29,24 @@ export default function Navbar() {
     return () => window.removeEventListener("hashchange", syncHash);
   }, []);
 
+  useEffect(() => {
+    if (pathname !== "/") return;
+    const hash = activeHash || window.location.hash;
+    if (!hash) return;
+    const id = hash.slice(1);
+    let attempts = 0;
+    const interval = setInterval(() => {
+      const target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth" });
+        clearInterval(interval);
+      } else if (++attempts > 20) {
+        clearInterval(interval);
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [pathname, activeHash]);
+
   if (pathname.startsWith("/dashboard")) {
     return null;
   }
@@ -78,17 +96,17 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" onClick={() => setActiveHash("")} className="flex items-center gap-2.5">
-          <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <Link href="/" onClick={() => setActiveHash("")} className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
             <Wrench className="size-5" />
           </span>
-          <span className="text-lg font-bold tracking-tight text-foreground">
+          <span className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
             Equipment Rental <span className="text-primary">Rangpur</span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1.5 md:flex">
           {navLinks.map((item) => {
             const isActive = isLinkActive(item);
             return (
@@ -97,7 +115,7 @@ export default function Navbar() {
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item)}
                 className={cn(
-                  "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
+                  "rounded-lg px-4 py-2 text-[15px] font-medium transition-colors",
                   isActive
                     ? "bg-accent text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -109,19 +127,19 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-2.5 md:flex">
           <ThemeToggle />
           {isPending ? (
-            <div className="h-8 w-28 animate-pulse rounded-md bg-muted" />
+            <div className="h-9 w-32 animate-pulse rounded-md bg-muted" />
           ) : session?.user ? (
             <>
               <Link href="/dashboard">
-                <Button variant="outline" size="sm" className="gap-1.5">
+                <Button variant="outline" className="gap-2 px-4 text-sm font-medium">
                   <LayoutDashboard className="size-4" />
                   Dashboard
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5">
+              <Button variant="ghost" onClick={handleLogout} className="gap-2 px-4 text-sm font-medium">
                 <LogOut className="size-4" />
                 Logout
               </Button>
@@ -129,12 +147,12 @@ export default function Navbar() {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" className="px-4 text-sm font-medium">
                   Login
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm">Register</Button>
+                <Button className="px-5 text-sm font-medium">Register</Button>
               </Link>
             </>
           )}

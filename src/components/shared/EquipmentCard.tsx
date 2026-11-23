@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MapPin, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,10 +23,13 @@ export default function EquipmentCard({ item }: { item: EquipmentItem }) {
 
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-xl border bg-card transition-shadow hover:shadow-md">
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
-        <img
+      <div className="relative aspect-16/10 w-full overflow-hidden bg-muted">
+        <Image
           src={item.image}
           alt={item.name}
+          width={800}
+          height={500}
+          unoptimized
           className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
         />
         <span
