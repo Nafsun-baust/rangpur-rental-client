@@ -37,7 +37,7 @@ const benefits = [
 
 export default function WhyChooseUs() {
   return (
-    <section id="why-choose-us" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+    <section id="why-choose-us" className="scroll-mt-20 mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <div className="mx-auto mb-12 max-w-2xl text-center">
         <p className="text-xs font-semibold uppercase tracking-widest text-blue-600">
           Why Choose Us

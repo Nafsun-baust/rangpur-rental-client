@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/auth-client";
+import ThemeToggle from "@/components/shared/ThemeToggle";
 
 interface SidebarUser {
   name: string;
@@ -67,13 +68,16 @@ export default function DashboardSidebar({ user }: { user: SidebarUser }) {
 
   const sidebarContent = (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center gap-2.5 border-b px-5">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-          <Wrench className="size-4" />
-        </span>
-        <Link href="/" className="text-sm font-bold tracking-tight">
-          Equipment Rental <span className="text-primary">Rangpur</span>
+      <div className="flex h-16 items-center justify-between gap-2 border-b px-5">
+        <Link href="/" className="flex items-center gap-2 text-sm font-bold tracking-tight">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <Wrench className="size-4" />
+          </span>
+          <span>
+            Equipment Rental <span className="text-primary">Rangpur</span>
+          </span>
         </Link>
+        <ThemeToggle />
       </div>
 
       <div className="border-b px-5 py-4">

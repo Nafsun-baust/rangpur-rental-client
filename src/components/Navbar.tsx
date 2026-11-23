@@ -1,30 +1,72 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LayoutDashboard, LogOut, Menu, Wrench, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import ThemeToggle from "@/components/shared/ThemeToggle";
 import { cn } from "@/lib/utils";
 import { signOut, useSession } from "@/lib/auth-client";
 
 const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "All Equipment", href: "/equipment" },
-  { label: "How It Works", href: "/#how-it-works" },
-  { label: "About", href: "/#why-choose-us" },
+  { label: "Home", href: "/", hash: "" },
+  { label: "All Equipment", href: "/equipment", hash: "" },
+  { label: "How It Works", href: "/#how-it-works", hash: "#how-it-works" },
+  { label: "About", href: "/#why-choose-us", hash: "#why-choose-us" },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeHash, setActiveHash] = useState("");
   const { data: session, isPending } = useSession();
+
+  useEffect(() => {
+    const syncHash = () => setActiveHash(window.location.hash || "");
+    window.addEventListener("hashchange", syncHash);
+    return () => window.removeEventListener("hashchange", syncHash);
+  }, []);
 
   if (pathname.startsWith("/dashboard")) {
     return null;
   }
+
+  const isLinkActive = (item: (typeof navLinks)[number]) => {
+    if (item.hash) {
+      return pathname === "/" && activeHash === item.hash;
+    }
+    if (item.href === "/") {
+      return pathname === "/" && activeHash === "";
+    }
+    return pathname.startsWith(item.href);
+  };
+
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    item: (typeof navLinks)[number]
+  ) => {
+    setMobileOpen(false);
+    if (item.hash && pathname === "/") {
+      e.preventDefault();
+      setActiveHash(item.hash);
+      window.history.replaceState(null, "", item.hash);
+      const target = document.getElementById(item.hash.slice(1));
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+      return;
+    }
+    if (item.href === "/" && pathname === "/") {
+      e.preventDefault();
+      setActiveHash("");
+      window.history.replaceState(null, "", "/");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setActiveHash(item.hash);
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -37,7 +79,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link href="/" onClick={() => setActiveHash("")} className="flex items-center gap-2.5">
           <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
             <Wrench className="size-5" />
           </span>
@@ -48,14 +90,12 @@ export default function Navbar() {
 
         <nav className="hidden items-center gap-1 md:flex">
           {navLinks.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
+            const isActive = isLinkActive(item);
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={(e) => handleNavClick(e, item)}
                 className={cn(
                   "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
                   isActive
@@ -69,7 +109,8 @@ export default function Navbar() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-2.5 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
+          <ThemeToggle />
           {isPending ? (
             <div className="h-8 w-28 animate-pulse rounded-md bg-muted" />
           ) : session?.user ? (
@@ -99,29 +140,40 @@ export default function Navbar() {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setMobileOpen((prev) => !prev)}
-          aria-label="Toggle menu"
-          className="inline-flex size-9 items-center justify-center rounded-md border text-foreground md:hidden"
-        >
-          {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-        </button>
+        <div className="flex items-center gap-1.5 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setMobileOpen((prev) => !prev)}
+            aria-label="Toggle menu"
+            className="inline-flex size-9 items-center justify-center rounded-md border text-foreground"
+          >
+            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+        </div>
       </div>
 
       {mobileOpen && (
         <div className="border-t bg-background px-4 py-4 md:hidden">
           <div className="flex flex-col gap-1">
-            {navLinks.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navLinks.map((item) => {
+              const isActive = isLinkActive(item);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item)}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium",
+                    isActive
+                      ? "bg-accent text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
           <div className="mt-4 flex gap-2 border-t pt-4">
             {session?.user ? (

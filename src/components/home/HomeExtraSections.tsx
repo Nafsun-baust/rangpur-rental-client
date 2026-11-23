@@ -33,7 +33,7 @@ export default function HomeExtraSections() {
     <>
       <section
         id="how-it-works"
-        className="border-y border-indigo-100 bg-indigo-50/50 py-20 dark:border-zinc-800 dark:bg-zinc-900/50"
+        className="scroll-mt-20 border-y border-indigo-100 bg-indigo-50/50 py-20 dark:border-zinc-800 dark:bg-zinc-900/50"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-2xl text-center">
