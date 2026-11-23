@@ -3,7 +3,7 @@
 Frontend web application for Equipment Rental Rangpur.It is an equipment rental marketplace where owners list equipment and customers browse, book, and pay securely online.
 
 ## Live URL
-- Client: 
+- Client: https://rangpur-rental-client.vercel.app
 - Server: https://rangpur-rental-server.vercel.app
 
 ## Key Features
