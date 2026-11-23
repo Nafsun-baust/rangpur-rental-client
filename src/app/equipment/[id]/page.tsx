@@ -15,13 +15,17 @@ import { getEquipmentById } from "@/lib/api/equipment";
 import { getMyFavorites } from "@/lib/actions/favorites";
 import { requireAuth } from "@/lib/core/server";
 import FavoriteButton from "./_components/FavoriteButton";
+import BookingModal from "./_components/BookingModal";
 
 export default async function EquipmentDetailsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ canceled?: string }>;
 }) {
   const { id } = await params;
+  const { canceled } = await searchParams;
   const session = await requireAuth(`/equipment/${id}`);
 
   const item = await getEquipmentById(id);
@@ -46,6 +50,12 @@ export default async function EquipmentDetailsPage({
         <ArrowLeft className="size-4" />
         Back to All Equipment
       </Link>
+
+      {canceled === "1" && (
+        <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300">
+          Payment was cancelled. You can adjust your booking details and try again anytime.
+        </div>
+      )}
 
       <div className="grid gap-10 lg:grid-cols-12">
         <div className="lg:col-span-7">
@@ -144,6 +154,10 @@ export default async function EquipmentDetailsPage({
             </div>
 
             <div className="mt-6 flex flex-wrap gap-3">
+              <BookingModal
+                item={item}
+                userRole={session.user.role || "customer"}
+              />
               {session.user.role === "customer" && (
                 <FavoriteButton
                   equipmentId={item._id}
