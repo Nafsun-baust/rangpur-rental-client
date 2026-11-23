@@ -1,10 +1,13 @@
 "use client";
+
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { Menu, Wrench, X } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, Wrench, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { signOut, useSession } from "@/lib/auth-client";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -15,11 +18,21 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { data: session, isPending } = useSession();
 
   if (pathname.startsWith("/dashboard")) {
     return null;
   }
+
+  const handleLogout = async () => {
+    await signOut();
+    toast.success("Logged out successfully");
+    setMobileOpen(false);
+    router.refresh();
+    router.push("/");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -57,14 +70,33 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-2.5 md:flex">
-          <Link href="/login">
-            <Button variant="ghost" size="sm">
-              Login
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm">Register</Button>
-          </Link>
+          {isPending ? (
+            <div className="h-8 w-28 animate-pulse rounded-md bg-muted" />
+          ) : session?.user ? (
+            <>
+              <Link href="/dashboard">
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <LayoutDashboard className="size-4" />
+                  Dashboard
+                </Button>
+              </Link>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1.5">
+                <LogOut className="size-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="ghost" size="sm">
+                  Login
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button size="sm">Register</Button>
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -92,12 +124,25 @@ export default function Navbar() {
             ))}
           </div>
           <div className="mt-4 flex gap-2 border-t pt-4">
-            <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1">
-              <Button variant="outline" className="w-full">Login</Button>
-            </Link>
-            <Link href="/register" onClick={() => setMobileOpen(false)} className="flex-1">
-              <Button className="w-full">Register</Button>
-            </Link>
+            {session?.user ? (
+              <>
+                <Link href="/dashboard" onClick={() => setMobileOpen(false)} className="flex-1">
+                  <Button variant="outline" className="w-full">Dashboard</Button>
+                </Link>
+                <Button variant="destructive" className="flex-1" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" onClick={() => setMobileOpen(false)} className="flex-1">
+                  <Button variant="outline" className="w-full">Login</Button>
+                </Link>
+                <Link href="/register" onClick={() => setMobileOpen(false)} className="flex-1">
+                  <Button className="w-full">Register</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
